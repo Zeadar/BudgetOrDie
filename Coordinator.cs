@@ -4,24 +4,27 @@ namespace BudgetOrDie{
 	public class Coordinator{
 		List<BudgetItem> budgetItems = new List<BudgetItem>();
 
-		//UInt16 data type to prevent accidental negative number
-		public void AddExpense(UInt16 expense){
+		//UInt32 data type to prevent accidental negative number
+		public void AddExpense(UInt32 expense){
 			budgetItems.Add(new BudgetItem(-(int)expense));
 		}
 
-		public void AddIncome(UInt16 income){
+		public void AddIncome(UInt32 income){
 			budgetItems.Add(new BudgetItem((income)));
 		}
 
+		public string Name {get; set;} = "New Budget";
+
 		public string Serialize(){
-			return JsonSerializer.Serialize(budgetItems);
+			var saveData = new SaveData(budgetItems, Name);
+			return JsonSerializer.Serialize(saveData);
 		}
 
 		public void Deserialize(string json){
-			List<BudgetItem>? input;
+			SaveData? input;
 
 			try {
-				input = JsonSerializer.Deserialize<List<BudgetItem>>(json);
+				input = JsonSerializer.Deserialize<SaveData>(json);
 			} catch (Exception err){
 				ColorWriter.RedLine("JSON parsing failed:");
 				ColorWriter.RedLine(err.ToString());
@@ -33,10 +36,12 @@ namespace BudgetOrDie{
 				return;
 			}
 
+			Name = input.Name;
 			budgetItems.Clear();
-			foreach (var item in input){
+			foreach (var item in input.Items){
 				budgetItems.Add(item);
 			}
+			ColorWriter.GreenLine("Successfully parsed data");
 		}
 	}
 }

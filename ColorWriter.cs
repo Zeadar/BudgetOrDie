@@ -6,6 +6,12 @@ namespace BudgetOrDie{
 			Console.ResetColor();
 		}
 
+		static public void GreenLine(string input){
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine(input);
+			Console.ResetColor();
+		}
+
 		static public void YellowPrompt(string input){
 			Console.ForegroundColor = ConsoleColor.Yellow;
 			Console.Write(input.PadLeft(25));

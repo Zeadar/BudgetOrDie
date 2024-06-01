@@ -1,6 +1,6 @@
 namespace BudgetOrDie{
 	public class BudgetItem{
-		public int Money {get; set;}
+		public Int64 Money {get; set;}
 		public bool Expense {
 			get {
 				return Money < 0;
@@ -8,7 +8,7 @@ namespace BudgetOrDie{
 		}
 
 		//Expense if < 0, otherwise income.
-		public BudgetItem(int money){
+		public BudgetItem(Int64 money){
 			Money = money;
 		}
 

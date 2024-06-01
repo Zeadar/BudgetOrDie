@@ -1,14 +1,10 @@
 ﻿using BudgetOrDie;
 
-// Console.WriteLine(
-// """
 //  ___         _             _                ___  _      
 // | . > _ _  _| | ___  ___ _| |_   ___  _ _  | . \<_> ___ 
 // | . \| | |/ . |/ . |/ ._> | |   / . \| '_> | | || |/ ._>
 // |___/`___|\___|\_. |\___. |_|   \___/|_|   |___/|_|\___.
 //                <___'                                    
-// """
-// );
 
 Console.ForegroundColor = ConsoleColor.Cyan;
 Console.WriteLine(" ___         _             _                ___  _      ");
@@ -26,6 +22,7 @@ var coordinator = new Coordinator();
 MainMenu();
 
 void MainMenu(){
+
 	Console.WriteLine("Enter \"N\" to make new budget");
 	Console.WriteLine("Enter \"S\" to save budget");
 	Console.WriteLine("Enter \"L\" to load budget");
@@ -36,7 +33,7 @@ void MainMenu(){
 				//TODO
 				break;
 			case "S":
-				//TODO
+				Save();
 				break;
 			case "L":
 				Load();
@@ -53,7 +50,7 @@ void MainMenu(){
 
 void Quit(){
 	Console.WriteLine("Are you sure?");
-	if (Query("[y]?") == "Y"){
+	if (Query("[Y]?") == "Y"){
 		Environment.Exit(0);
 	}
 	//No return or call. Will just run through
@@ -64,7 +61,7 @@ void Load(){
 	ColorWriter.YellowPrompt("Enter budget name or [Q]");
 	string input = Console.ReadLine() ?? ""; 
 	string fileName = $"{input.Trim().ToLower()}.json";
-	string json = "";
+	string? json;
 
 	if (input.Trim().ToUpper() == "Q"){
 		return;
@@ -80,7 +77,23 @@ void Load(){
 		return;
 	}
 
+	ColorWriter.GreenLine($"Successfully loaded budget {input.Trim()} from {fileName}");
 	coordinator.Deserialize(json);
+}
+
+void Save(){
+	string json = coordinator.Serialize();
+	string fileName = $"{coordinator.Name.ToLower()}.json";
+	string path = Path.Combine(Environment.CurrentDirectory, fileName);
+
+	try {
+		File.WriteAllText(path, json);
+	} catch (Exception err){
+		ColorWriter.RedLine("Failed saving to file:");
+		ColorWriter.RedLine(err.ToString());
+	}
+
+	ColorWriter.GreenLine($"Saved {coordinator.Name} as {path}");
 }
 
 string Query(string question){
