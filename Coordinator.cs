@@ -15,6 +15,10 @@ namespace BudgetOrDie{
 
 		public string Name {get; set;} = "New Budget";
 
+		public void PrintBudget(){
+			
+		}
+
 		public string Serialize(){
 			var saveData = new SaveData(budgetItems, Name);
 			return JsonSerializer.Serialize(saveData);
@@ -25,9 +29,8 @@ namespace BudgetOrDie{
 
 			try {
 				input = JsonSerializer.Deserialize<SaveData>(json);
-			} catch (Exception err){
-				ColorWriter.RedLine("JSON parsing failed:");
-				ColorWriter.RedLine(err.ToString());
+			} catch (Exception ex){
+				ColorWriter.RedLine(ex.Message);
 				return;
 			}
 

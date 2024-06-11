@@ -16,6 +16,5 @@ namespace BudgetOrDie{
         {
             return Money.ToString();
         }
-            
 	}
 }
