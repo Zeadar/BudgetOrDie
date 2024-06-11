@@ -1,4 +1,5 @@
 ﻿using BudgetOrDie;
+using System.Runtime.InteropServices;
 
 //  ___         _             _                ___  _      
 // | . > _ _  _| | ___  ___ _| |_   ___  _ _  | . \<_> ___ 
@@ -102,12 +103,12 @@ void Load(){
 	Console.WriteLine("Enter [#] to load file");
 
 	List<string> jsonPaths = Directory.GetFiles(Directory.GetCurrentDirectory())
-		.Where(fullPath => fullPath.Contains(".json")).ToList();
+		.Where(fullPath => fullPath.Contains(".json") && !fullPath.Contains("BudgetOrDie.deps.json") && !fullPath.Contains("BudgetOrDie.runtimeconfig.json")).ToList();
 
 	int index = 1;
 	foreach (string fullPath in jsonPaths){
-		//ColorWriter.GreenLine(fullPath);
-		string fileName = fullPath.Split("/").Last();
+		ColorWriter.GreenLine(fullPath);
+		string fileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? fullPath.Split("\\").Last() : fullPath.Split("/").Last();
 		Console.WriteLine($"[{index++}] {fileName}");
 	}
 
