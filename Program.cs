@@ -205,11 +205,10 @@ void AddItem(){
 
 			if (expense){
 				coordinator.AddExpense(amount, date, note);
-				ColorWriter.GreenLine($"Added expense {amount} on {date.ToString("yyyy-MM-dd")}");
 			} else {
 				coordinator.AddIncome(amount, date, note);
-				ColorWriter.GreenLine($"Added income {amount} on {date.ToString("yyyy-MM-dd")}");
 			}
+			ColorWriter.GreenLine($"Added {(expense ? "expense" : "income")} {amount} on {date.ToString("yyyy-MM-dd").Replace("/", "-")}");
 			break;
 		} catch (Exception ex){
 			ColorWriter.RedLine(ex.Message);
