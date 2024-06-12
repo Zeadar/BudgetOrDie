@@ -33,14 +33,16 @@ namespace BudgetOrDie{
 			Console.Write(" ");
 			Console.Write("Expense".PadLeft(49));
 			Console.Write(" ");
-			Console.Write("\n");
-			Console.ResetColor();
+            //Console.Write("\n");
+            Console.ResetColor();
+            Console.WriteLine();			
 
 			for (int i = 0; i != amountLines; ++i){
 				PrintSide(incomes, i);
 				PrintSide(expenses, i);
-				Console.Write("\n");
-			}
+                //Console.Write("\n");
+                Console.WriteLine();
+            }
 			Console.ResetColor();
 			Console.BackgroundColor = ConsoleColor.DarkBlue;
 			Console.ForegroundColor = ConsoleColor.White;
@@ -50,11 +52,13 @@ namespace BudgetOrDie{
 			Console.Write(" ");
 			Console.Write(totalExpense.ToString().PadLeft(49));
 			Console.Write(" ");
-			Console.Write("\n");
-			Console.Write("Balance: ".PadLeft(25));
+            //Console.Write("\n");
+            Console.WriteLine();
+            Console.Write("Balance: ".PadLeft(25));
 			Console.Write(currentMonthItems.Select(bi => bi.Money).Sum().ToString().PadRight(75));
-			Console.Write("\n");
-			Console.ResetColor();
+            //Console.Write("\n");
+            Console.ResetColor();
+            Console.WriteLine();
 		}
 
 		void PrintSide(List<BudgetItem> items, int i){

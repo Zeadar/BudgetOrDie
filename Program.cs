@@ -306,7 +306,8 @@ void Save(){
 string Query(string question){
 	ColorWriter.YellowPrompt(question);
 	string input = Console.ReadLine() ?? "";
-	return input.Trim().ToUpper();
+    Console.WriteLine();
+    return input.Trim().ToUpper();
 }
 
 string Capitalize(string input){
