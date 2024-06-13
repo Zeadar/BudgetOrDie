@@ -1,6 +1,8 @@
 ﻿using BudgetOrDie;
 using System.Runtime.InteropServices;
 
+Console.Clear();
+
 //  ___         _             _                ___  _      
 // | . > _ _  _| | ___  ___ _| |_   ___  _ _  | . \<_> ___ 
 // | . \| | |/ . |/ . |/ ._> | |   / . \| '_> | | || |/ ._>
@@ -20,6 +22,7 @@ Console.WriteLine("               <___'                                    ");
 Console.ResetColor();
 
 Coordinator coordinator = new Coordinator();
+DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Now);
 
 MainMenu();
 
@@ -92,9 +95,12 @@ void MainMenu(){
 
 void EditBudget(){
 	while(true){
+		ColorWriter.GreenLine($"Selected month: {selectedDate.Year}-{selectedDate.Month}");
+		Console.WriteLine("[C]ange month");
 		Console.WriteLine("[P]rint Budget");
 		Console.WriteLine("[A]dd new item");
-		string input = Query("[P] [A] [Q]");
+		Console.WriteLine("[R]emove item");
+		string input = Query("[P] [A] [Q] [R]");
 
 		if (input == "Q"){
 			break;
@@ -102,11 +108,17 @@ void EditBudget(){
 
 		try {
 			switch(input){
+				case "C":
+					ChangeMonth();
+					break;
 				case "P":
 					PrintBudget();
 					break;
 				case "A":
 					AddItem();
+					break;
+				case "R":
+					RemoveItem();
 					break;
 				default:
 					throw new Exception($"Unrecognised input {input}");
@@ -117,8 +129,77 @@ void EditBudget(){
 	}
 }
 
+void ChangeMonth(){
+	while(true){
+		Console.WriteLine("Enter month to view [yyyy-MM]");
+		Console.WriteLine("Enter month [MM] assuming current year.");
+		Console.WriteLine("Enter blank line for current month");
+		string input = Query("[yyyy-MM] [MM] [_] [Q]");
+
+		if (input == "Q"){
+			break;
+		}
+
+		try {
+			DateOnly date = QueryMonth(input);
+			selectedDate = date;
+			break;
+		} catch (Exception ex){
+			ColorWriter.RedLine(ex.Message);
+		}
+		
+	}
+}
+
 void PrintBudget(){
-	coordinator.PrintBudget(DateOnly.FromDateTime(DateTime.Now));
+	coordinator.PrintBudget(selectedDate);
+	//coordinator.PrintBudget(DateOnly.FromDateTime(DateTime.Now));
+}
+
+void RemoveItem(){
+	List<BudgetItem> candidates = coordinator.GetItemsInMonth(selectedDate);
+	if (candidates.Count == 0){
+		ColorWriter.RedLine($"No items in {selectedDate.Year}-{selectedDate.Month}");
+		return;
+	}
+
+	while(true){
+		Console.WriteLine("Select which item to remove");
+		int index = 1;
+		foreach (var bi in candidates){
+			Console.WriteLine($"{index++}. {(bi.Expense ? "Expense" : "Income")} {bi.Note} {bi.ToString()}");
+		}
+
+		string input = Query("[##] [Q]");
+
+		if (input == "Q"){
+			return;
+		}
+
+		try {
+			int i = Convert.ToInt32(input);
+			BudgetItem chosen = candidates[i - 1];
+			coordinator.RemoveItem(chosen);
+			ColorWriter.GreenLine($"Removed {chosen.ToString()} {chosen.Note}");
+			break;
+		} catch (Exception ex){
+			ColorWriter.RedLine(ex.Message);
+		}
+	}
+}
+
+DateOnly QueryMonth(string input){
+	DateOnly date;
+	if (input == ""){
+		date = DateOnly.FromDateTime(DateTime.Now);
+	} else if (input.Length < 3){
+		date = DateOnly.FromDateTime(Convert.ToDateTime($"{DateTime.Now.Year}-{input}-01"));
+	} else {
+		date = DateOnly.FromDateTime(Convert.ToDateTime($"{input}-01"));
+	}
+
+	return date;
+	
 }
 
 void AddItem(){
@@ -184,35 +265,33 @@ void AddItem(){
 	}
 
 	while (true){
-		Console.WriteLine("Enter date [yyyy-MM-dd]");
-		Console.WriteLine("Enter [MM-dd] assuming current year");
-		Console.WriteLine("Enter [dd] assuming current year and current month");
-		string input = Query("[yyyy-MM-dd] [MM-dd] [dd] [Q]");
+		Console.WriteLine($"Enter which date in {selectedDate.Year}-{selectedDate.Month}");
+		Console.WriteLine("Enter format [dd] for date");
+
+		string input = Query("[dd] [Q]");
 
 		if (input == "Q"){
 			return;
 		}
-
 		try {
-			DateOnly date;
-			if (input.Length == 5){
-				date = DateOnly.FromDateTime(Convert.ToDateTime($"{DateTime.Now.Year}-{input}"));
-			} else if (input.Length < 3){
-				date = DateOnly.FromDateTime(Convert.ToDateTime($"{DateTime.Now.Year}-{DateTime.Now.Month}-{input}"));
-			} else {
-				date = DateOnly.FromDateTime(Convert.ToDateTime(input));
-			}
+			DateOnly date = DateOnly.FromDateTime(Convert.ToDateTime($"{selectedDate.Year}-{selectedDate.Month}-{input}"));
 
 			if (expense){
 				coordinator.AddExpense(amount, date, note);
 			} else {
 				coordinator.AddIncome(amount, date, note);
 			}
-			ColorWriter.GreenLine($"Added {(expense ? "expense" : "income")} {amount} on {date.ToString("yyyy-MM-dd").Replace("/", "-")}");
 			break;
 		} catch (Exception ex){
 			ColorWriter.RedLine(ex.Message);
 		}
+		// Console.WriteLine("Enter date [yyyy-MM-dd]");
+		// Console.WriteLine("Enter [MM-dd] assuming current year");
+		// Console.WriteLine("Enter blank line for today");
+
+
+		// 	ColorWriter.GreenLine($"Added {(expense ? "expense" : "income")} {amount} on {date.ToString("yyyy-MM-dd").Replace("/", "-")}");
+		// 	break;
 	}
 
 }
@@ -237,7 +316,8 @@ bool CrateNew(){
 
 void Quit(){
 	Console.WriteLine("Are you sure?");
-	if (Query("[Y]?") == "Y"){
+	Console.WriteLine("Please ensure the budget is saved!");
+	if (Query("[Y] [Q]") == "Y"){
 		Environment.Exit(0);
 	}
 }
@@ -251,7 +331,7 @@ bool Load(){
 			&& !fullPath.Contains("BudgetOrDie.runtimeconfig.json")).ToList();
 
 	if (jsonPaths.Count == 0){
-		ColorWriter.RedLine("No JSON file found!");
+		ColorWriter.RedLine("No JSON files found!");
 		ColorWriter.RedLine("Looks like you have to create a new budget instead :)");
 		return false;
 	}
@@ -306,11 +386,10 @@ void Save(){
 string Query(string question){
 	ColorWriter.YellowPrompt(question);
 	string input = Console.ReadLine() ?? "";
-    Console.WriteLine();
+	Console.Clear();
     return input.Trim().ToUpper();
 }
 
 string Capitalize(string input){
 	return $"{input.Substring(0, 1).ToUpper()}{input.Substring(1).ToLower()}";
 }
-

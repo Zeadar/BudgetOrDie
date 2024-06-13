@@ -13,6 +13,16 @@ namespace BudgetOrDie{
 			budgetItems.Add(new BudgetItem(income, date, note));
 		}
 
+		public List<BudgetItem> GetItemsInMonth(DateOnly date){
+			return budgetItems.Where(bi => bi.Date.Month == date.Month)
+					.OrderBy(bi => bi.Expense)
+					.ToList();
+		}
+
+		public void RemoveItem(BudgetItem item){
+			budgetItems.Remove(item);
+		}
+
 		public string Name {get; set;} = "New Budget";
 
 		public void PrintBudget(DateOnly date){
